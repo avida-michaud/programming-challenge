@@ -13,6 +13,8 @@
     "electron-prebuilt": "^0.26.0",
     "react": "^0.13.3",
     "react-bootstrap": "^0.22.0",
+    "sfx": "^0.1.1",
+    "sound-effect-manager": "^1.0.0",
     "win-spawn": "^2.0.0"
   }
 }
