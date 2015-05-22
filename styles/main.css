@@ -3,9 +3,30 @@
     height: 100%;
 }
 
+.sizeInput {
+	height: 40px;
+	width: 60px;
+	border-style: groove;
+	border-color: darkgrey;
+	text-align: center;
+}
+
 .square {
     border: 1px solid #777777;
     float: left;
-	justify-content: space-around;
+	justify-content: center;
 }
+
+.board {
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.checker {
+	width: 40px;
+	height: 40px;
+	background-image: url("checker_72.png");
+	margin: auto;
+}
+
 

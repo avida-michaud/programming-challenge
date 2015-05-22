@@ -19,17 +19,25 @@ export default React.createClass({
         let style = {}
         return (
             <div className='controls' ref='controls'>
-                <Input
-                    label="Set Size:"
-                    type='number'
-                    step="1.0"
-                    min={3.0}
-                    max={10.0}
-                    value={this.props.control.getSize()}
-                    disabled={isPlaying}
-                    onChange={this.onSetSize}
-                    ref='sizeInput'>
-                </Input>
+                <div className='sizeGroup'>
+                    <div>
+                    <label disabled={isPlaying}>
+                        Set Size
+                    </label>
+                    </div>
+                    <div>
+                    <Input className='sizeInput' ref='sizeInput'
+                        type='number'
+                        step={1.0}
+                        min={3.0}
+                        max={10.0}
+                        maxLength={2}
+                        value={this.props.control.getSize()}
+                        disabled={isPlaying}
+                        onChange={this.onSetSize}>
+                    </Input>
+                    </div>
+                </div>
                 <ButtonToolbar>
                   <Button bsStyle={isPlaying ? "danger" : "success"}
                         onClick={isPlaying ? this.onStop : this.onPlay}>
