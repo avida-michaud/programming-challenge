@@ -28,7 +28,7 @@ let MainView = React.createClass({
         return <div>
                 <Controls control={this}/>
                 <Status message={this.state.game.status} />
-                <BoardView game={this.state.game} checker={this.state.game.getCurrentKey()}/>
+                <BoardView game={this.state.game}/>
                </div>;
     },
 
@@ -42,7 +42,7 @@ let MainView = React.createClass({
         this.state.game.pause();
 
         // update status message here because we won't in the poll
-        let statusMsg = this.state.game.getStatusMessage();
+        let statusMsg = this.state.game.status;
         this.setState({game: this.state.game, message: statusMsg});
     },
 
@@ -51,7 +51,7 @@ let MainView = React.createClass({
         this.state.game.reset();
 
        // update status message here because we won't in the poll
-        let statusMsg = this.state.game.getStatusMessage();
+        let statusMsg = this.state.game.status;
         this.setState({game: this.state.game, message: statusMsg});
     },
 
@@ -68,7 +68,7 @@ let MainView = React.createClass({
     },
 
     isPlaying() {
-        return this.state.game.isPlaying();
+        return this.state.game.playing;
     },
 
     componentDidMount: function(){
@@ -93,7 +93,7 @@ let MainView = React.createClass({
         
         if (update)
         {
-            let statusMsg = this.state.game.getStatusMessage();
+            let statusMsg = this.state.game.status;
             this.setState({game: this.state.game, message: statusMsg});
         }
     },

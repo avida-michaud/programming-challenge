@@ -40,25 +40,19 @@ export default React.createClass({
        
         // @NOTE- move this with data or pass it down instead of the enum
         let glyphs = ['arrow-left', 'arrow-right', 'arrow-up', 'arrow-down'];
-        
+        let tortoiseUrl = "url('./styles/tortoise.png')";
+        let hareUrl = "url('./styles/hare.png')";
+
         //To set a div's class in React you must use the 'className' attribute, instead of the
         //usual 'class' attribute. This is because 'class' is a reserved keyword in ECMAScript 6.
         return <div className='square' ref='square' style={style}>
-                    <Label>{this.key}</Label>
                     <Label bsStyle={this.props.glyphStyle}>
                         <Glyphicon glyph={glyphs[this.props.arrow]}/>
                     </Label>
-                    {this.props.drawChecker ? <Checker size={this.props.size}/> : null}
+                    <div className='checkerGroup'>
+                        {this.props.drawHare ? <Checker foreground={hareUrl}/> : null}
+                        {this.props.drawTortoise ? <Checker foreground={tortoiseUrl}/> : null}
+                    </div>
                 </div>
-    },
-
-    /**
-     * After a component mounts (ie the component is added to the DOM), this
-     * function is called. Here you can get a reference to the DOMElement by
-     * using reacts ref mechanism.
-     */
-  //  componentDidMount() {
-  //      //checker is a reference to a DOMElement.
-  //      let checker = React.findDOMNode(this.refs.square);
-  //  }
+    }
 });

@@ -23,10 +23,18 @@
 }
 
 .checker {
-	width: 40px;
-	height: 40px;
+	width: 32px;
+	height: 32px;
 	background-image: url("checker_72.png");
+}
+
+.checkerForeground {
+	width: 24px;
+	height: 24px;
 	margin: auto;
 }
 
+.checkerGroup {
+	display: -webkit-box;
+}
 

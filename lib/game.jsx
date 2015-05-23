@@ -24,225 +24,203 @@ var MoveReturn = Object.freeze({CONTINUE:0, WIN:1, LOSE:2})
 // -----------------------------------------------------------------------------
 // Game - holds our model/data for the board, game iterator(s) and knows how to 
 //        reset
-var Game = function(size, squareSize) {
-    // board properties
-    this.size = size;
-    this.squareSize = squareSize;
-    this.reset();
-};
+class Game
+{
+    constructor(size,squareSize) {
+        // board properties
+        this.size = size;
+        this.squareSize = squareSize;
+        this.reset();
+    }
 
+    // Reset squares' arrows and re-init game iterator(s)
+    reset() {
+        this.status = 'start';
+        this.playing = false;
+        this.hareFirst = true;
+    
+        this.squares = []; // does this make sure it's deleted/gc'd?
+        this.tortoise = {};
+        this.hare = {};
 
-// Reset squares' arrows and re-init game iterator(s)
-Game.prototype.reset = function() {
-    this.status = 'start';
-    this.playing = false;
+        // create the board data
+        this.squares = this.createSquares();
 
-    this.squares = []; // does this make sure it's deleted/gc'd?
-    this.iterator = {};
+        let numSquares = (this.size*this.size) - 1;
+        let startKey = Math.floor(Math.random()*numSquares);
 
-    this.squares = this.createSquares(this.size);
-    this.iterator = new GameIterator(this.size);
-}
+        this.tortoise = new GameIterator(this, startKey);
+        this.hare = new GameIterator(this, startKey);
+    }
 
-
-// Returns an array with all entries initialized to a random arrow based on board size
-Game.prototype.createSquares = function(size) {
-    let squares = [];
-    let key = 0;
-    for (var row = 0; row < size; row++) {
-        for (var col = 0; col < size; col++) {
-            squares[key] = Math.floor(Math.random()*4); // set random arrow
-            key++;
+    // Returns an array with all entries initialized to a random arrow based on board size
+    createSquares() {
+        let squares = [];
+        let key = 0;
+        for (var row = 0; row < this.size; row++) {
+            for (var col = 0; col < this.size; col++) {
+                squares[key] = Math.floor(Math.random()*4); // set random arrow
+                key++;
+            }
         }
+        
+        return squares;
     }
-    return squares;
-};
 
+    // start/pause the game
+    start() {
+        this.playing = true;
+        this.status = 'playing';
+    }
 
-// start & pause the game
-Game.prototype.start = function() {
-    this.playing = true;
-};
-
-
-Game.prototype.pause = function() {
-    this.playing = false;
-    this.status = 'paused';
-};
-
-
-// poll method (moves iterator(s) and checks if we won or if we're in a cyle)
-// also is the thing that updates the status; returns true if has something to update
-Game.prototype.poll = function() {
-    
-    if (!this.playing)
-        return false; // bail out early
-
-    let direction = this.getDirection(this.iterator.currentKey);
-    let retVal = this.iterator.move(direction);
-    
-    this.status = 'playing';
-
-    if (retVal == MoveReturn.WIN)
-    {
-        this.status = 'youwon';
-        console.log("You won!");
+    pause() {
         this.playing = false;
-    }
-    else if (retVal == MoveReturn.LOSE)
-    {
-        this.status = 'youlost';
-        this.playing = false;
-        console.log("You lost! (in a cycle)");
+        this.status = 'paused';
     }
 
-    return true;
-}
+    // Poll method (moves iterator(s) and checks if we won or if we're in a cyle)
+    // also is the thing that updates the status; returns true if has something to update
+    poll() {
+        if (!this.playing)
+            return false; // bail out early
+        
+        let won = false;
+        if (this.hareFirst)
+        {
+            // is this the hare's first move?
+            won = !this.hare.move();
+            this.hareFirst = false;
+        }
+        else
+        {
+            won = !(this.hare.move() && this.tortoise.move());
+            this.hareFirst = true;
+        }
 
-//
-// accessors
-//
+        // move hare 2x and tortoise 1x (hare must go first)
+        if (won)
+        {
+            // hare went off the board so hurray! we won.
+            this.playing = false;
+            this.status = 'youwon';
+            sfxMgr.play('win');
 
-// Returns current status message
-Game.prototype.getStatusMessage = function() {
-    return this.status;
-}
+            console.log("You won!");
+        }
+        else
+        {
+            // if none of the moves went off the board, then check if 
+            // the tortoise and hare are in the same position (key); if so,
+            // then we're in a loop
+            if (this.hare.currentKey == this.tortoise.currentKey)
+            {
+                // loop detected!
+                this.playing = false;
+                this.status = 'youlost';
+                sfxMgr.play('lose');
 
+                console.log("You lost! (in a cycle)");
+            }
+            else
+            {
+                // keep playing
+                 sfxMgr.play('move');
+            }
+        }
+      
+        return true;
+    }
 
-Game.prototype.isPlaying = function() {
-    return this.playing;
-}
+    //
+    // accessors
 
-
-// Returns the arrow enumeration (direction) of the given square (key)
-Game.prototype.getDirection = function(key) {
-    if (key <= this.squares.length)
-        return this.squares[key];
+    // Returns the arrow enumeration (direction) of the given square (key)
+    getDirection(key) {
+        if (key <= this.squares.length)
+            return this.squares[key];
     
-    return -1;
+        return -1;
+    }
+
+    // Update the board size
+    setSize(newSize) {
+        this.size = newSize;
+    }
 }
-
-
-// Returns the current key (position) of the iterator
-Game.prototype.getCurrentKey = function() {
-    return this.iterator.currentKey;
-}
-
-
-// update the board size
-Game.prototype.setSize = function(newSize) {
-    this.size = newSize;
-}
-
-
-// ask current iterator if it's visited a specific key
-Game.prototype.hasVisited = function(key) {
-    return this.iterator.hasVisited(key);
-}
-
 
 // -----------------------------------------------------------------------------
 // GameIterator - knows where it is and knows how to move along board
 //
-var GameIterator = function(size) {
-    // iterator properties
-    this.boardSize = size;
-    this.currentKey = -1;
- 
-    this.visited = {}; // for 0(1) lookups
 
-    // set our initial position
-    let numSquares = (this.boardSize*this.boardSize) - 1;
-    let startKey = Math.floor(Math.random()*numSquares);
-    this.setCurrentKey(startKey);
-};
+class GameIterator
+{
+    constructor(game, startKey) {
+        // "pointer" to the game
+        this.game = game;     
+                               
+        this.currentKey = -1;
+        
+        // set our initial position
+        this.setCurrentKey(startKey);
+    }
 
-
-// update the current key
-GameIterator.prototype.setCurrentKey = function(newKey) {
-    if (this.currentKey != newKey)
-    {
+    // Update the current key
+    setCurrentKey(newKey) {
         // set it 
-        this.currentKey = newKey;
+        if (this.currentKey != newKey)
+            this.currentKey = newKey;
+    }
 
-        // mark it visited
-        this.visited[this.currentKey] = true;
+    // Returns false if moved off the board (i.e. "won")
+    move() {
+        let won = false;
+        let direction = this.game.getDirection(this.currentKey);
+        let newKey = this.currentKey;
+
+        // use current position to figure out what our new position will be
+        if (newKey != -1)
+        {
+            switch (direction)
+            {
+                case ArrowDir.LEFT:
+                    if (newKey % this.game.size == 0) // currently at left-most spot?
+                    {
+                        newKey = -1;
+                        won = true; // off board!
+                    }
+                    else
+                        --newKey;
+                    break;
+
+                case ArrowDir.RIGHT:
+                    ++newKey;                       // does going right wrap us?
+                    if (newKey % this.game.size == 0)
+                    {
+                        newKey = -1;
+                        won = true; // off board!
+                    }
+                    break;
+
+                case ArrowDir.UP:
+                    newKey -= this.game.size;   // currently at top-most row?
+                    if (newKey < 0)
+                        won = true; // off board!
+                    break;
+
+                case ArrowDir.DOWN:
+                    newKey += this.game.size;  // currently at bottom-most row?
+                    if (newKey >= (this.game.size*this.game.size))
+                        won = true; // off board!
+                    break;
+            }
+        }
+
+        // If we didn't win yet, update our position/key
+        this.setCurrentKey(newKey); 
+        
+        return !won;
     }
 }
 
-
-GameIterator.prototype.hasVisited = function(key) {
-    return this.visited[key];
-}
-
-
-// Returns true if moved off the board (i.e. "won")
-GameIterator.prototype.move = function(direction) {
-
-    let retVal = MoveReturn.CONTINUE;
-    let newKey = this.currentKey;
-
-    // use current position to figure out what our new position will be
-    if (newKey != -1)
-    {
-        switch (direction)
-        {
-            case ArrowDir.LEFT:
-                if (newKey % this.boardSize == 0) // currently at left-most spot?
-                {
-                    newKey = -1;
-                    retVal = MoveReturn.WIN; // off board!
-                }
-                else
-                    --newKey;
-                break;
-
-            case ArrowDir.RIGHT:
-                ++newKey;                       // does going right wrap us?
-                if (newKey % this.boardSize == 0)
-                {
-                    newKey = -1;
-                    retVal = MoveReturn.WIN; // off board!
-                }
-                break;
-
-            case ArrowDir.UP:
-                newKey -= this.boardSize;   // currently at top-most row?
-                if (newKey < 0)
-                    retVal = MoveReturn.WIN; // off board!
-                break;
-
-            case ArrowDir.DOWN:
-                newKey += this.boardSize;  // currently at bottom-most row?
-                if (newKey >= (this.boardSize*this.boardSize))
-                    retVal = MoveReturn.WIN; // off board!
-                break;
-        }
-    }
-
-    // if we didn't win yet, then check if been here before; otherwise, set new key
-    if (retVal == MoveReturn.WIN)
-    {
-        sfxMgr.play('win');
-    }
-    else
-    {
-        console.log("Moving to ", newKey);
-        if (this.hasVisited(newKey))
-        {
-            retVal = MoveReturn.LOSE;   // we've already been here
-            // boo
-            sfxMgr.play('lose');
-        }
-        else
-        {
-            sfxMgr.play('move');
-        }
-
-        this.setCurrentKey(newKey); // move along
-    }
-
-    return retVal;
-}
 
 export default Game;

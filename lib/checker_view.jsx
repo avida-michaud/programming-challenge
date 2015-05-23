@@ -26,19 +26,14 @@ export default React.createClass({
      * @returns {XML}
      */
     render() {
-        //this will set the CSS style of the div we're returning.
-        //this.props are injected by the entity that instantiated
-        //this react class.
-       //let style = {
-       //    width: this.props.size * 0.25,
-       //    height: this.props.size * 0.25
-       //};
-
-
         //To set a div's class in React you must use the 'className' attribute, instead of the
         //usual 'class' attribute. This is because 'class' is a reserved keyword in ECMAScript 6.
-        return <div className='checker' ref='checker'/>
-//        return <div><Label>CHECKER</Label> </div>
+        let foregroundStyle = { backgroundImage: this.props.foreground };
+       
+        return <div className='checker' ref='checker'>
+                <div className='checkerForeground' style={foregroundStyle}> 
+                </div>
+                </div>
     }
 
 });
