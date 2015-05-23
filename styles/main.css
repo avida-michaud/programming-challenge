@@ -3,14 +3,7 @@
     height: 100%;
 }
 
-.sizeInput {
-	height: 40px;
-	width: 60px;
-	border-style: groove;
-	border-color: darkgrey;
-	text-align: center;
-}
-
+/* BOARD */
 .square {
     border: 1px solid #777777;
     float: left;
@@ -22,6 +15,8 @@
 	margin-right: auto;
 }
 
+
+/* CHECKER */
 .checker {
 	width: 32px;
 	height: 32px;
@@ -38,3 +33,36 @@
 	display: -webkit-box;
 }
 
+
+/* CONTROLS */
+.controls {
+	display: inline-flex;
+	margin-bottom: 10px;
+}
+
+.sizeHeader {
+	margin: auto;
+	padding-left: 10px;
+	padding-right: 5px;
+}
+
+.sizeInput {
+	height: 35px;
+	width: 60px;
+	border-style: groove;
+	border-color: darkgrey;
+	text-align: center;
+}
+
+.buttons {
+	padding-left: 20px;
+	justify-content: spac
+}
+
+.form-group {
+	margin: auto;
+}
+
+.btn {
+	margin-left: 2px;
+}

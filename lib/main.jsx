@@ -26,8 +26,8 @@ let MainView = React.createClass({
 
     render() {
         return <div>
-                <Controls control={this}/>
                 <Status message={this.state.game.status} />
+                <Controls control={this}/>
                 <BoardView game={this.state.game}/>
                </div>;
     },

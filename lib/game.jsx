@@ -83,7 +83,10 @@ class Game
     poll() {
         if (!this.playing)
             return false; // bail out early
-        
+
+         // move hare 2x and tortoise 1x (hare must go first); in order to get
+         // visual feedback on the hare's first move, we need to cache off the
+         // move count and have the hare's 2-move jump go over 2 polls/2 renders
         let won = false;
         if (this.hareFirst)
         {
@@ -97,7 +100,6 @@ class Game
             this.hareFirst = true;
         }
 
-        // move hare 2x and tortoise 1x (hare must go first)
         if (won)
         {
             // hare went off the board so hurray! we won.

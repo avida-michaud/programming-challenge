@@ -30,7 +30,6 @@ export default React.createClass({
                 // allow variable board sizes by making sure black squares are same even or odd 
                 // row/col combo and red squares are the ones that aren't even or odd.
                 let color = (isEvenRow == isEvenCol) ? '#333333' : '#FF3333'; 
-              //  let arrowColor = this.props.game.hasVisited(key) ? 'warning' : 'default';
 
                 let isTortoise = key == this.props.game.tortoise.currentKey;
                 let isHare = key == this.props.game.hare.currentKey;

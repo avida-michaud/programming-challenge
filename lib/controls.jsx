@@ -3,7 +3,7 @@
 //
 
 import React from 'react';
-import {Button, Input, ButtonToolbar} from 'react-bootstrap'
+import {Button, Input} from 'react-bootstrap'
 
 
 //------------------------------------------------------------------------------
@@ -16,29 +16,22 @@ export default React.createClass({
 
     render() {
         let isPlaying = this.props.control.isPlaying();
-        let style = {}
         return (
             <div className='controls' ref='controls'>
-                <div className='sizeGroup'>
-                    <div>
-                    <label disabled={isPlaying}>
-                        Set Size
-                    </label>
-                    </div>
-                    <div>
-                    <Input className='sizeInput' ref='sizeInput'
-                        type='number'
-                        step={1.0}
-                        min={3.0}
-                        max={10.0}
-                        maxLength={2}
-                        value={this.props.control.getSize()}
-                        disabled={isPlaying}
-                        onChange={this.onSetSize}>
-                    </Input>
-                    </div>
-                </div>
-                <ButtonToolbar>
+                <p className='sizeHeader'>
+                    Set Size
+                </p>
+                <Input className='sizeInput' ref='sizeInput'
+                    type='number'
+                    step={1.0}
+                    min={3.0}
+                    max={10.0}
+                    maxLength={2}
+                    value={this.props.control.getSize()}
+                    disabled={isPlaying}
+                    onChange={this.onSetSize}>
+                </Input>
+                <div className="buttons">
                   <Button bsStyle={isPlaying ? "danger" : "success"}
                         onClick={isPlaying ? this.onStop : this.onPlay}>
                         {isPlaying ? 'Stop' : 'Play'}
@@ -48,7 +41,7 @@ export default React.createClass({
                         onClick={!isPlaying ? this.onReset : null}>
                         Reset
                     </Button>
-               </ButtonToolbar>
+               </div>
             </div>
         );
     },
@@ -70,16 +63,7 @@ export default React.createClass({
 
     onSetSize() {
         let size = parseInt(this.refs.sizeInput.getValue());
+        // @TODO- do validation check here...
         this.props.control.setSize(size);
-    },
-
-         /**
-  * After a component mounts (ie the component is added to the DOM), this
-  * function is called. Here you can get a reference to the DOMElement by
-  * using reacts ref mechanism.
-  */
-//  componentDidMount() {
-//     let elem = React.findDOMNode(this.refs.controls);
-//     elem.style.backgroundColor = '#7777777';
-//  }
+    }
 });
